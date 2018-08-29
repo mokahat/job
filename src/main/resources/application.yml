@@ -1,0 +1,15 @@
+server:
+  port: 8081
+spring: 
+  application:
+    name: batch-job
+  datasource:
+    name: sitmmd
+    url: jdbc:mysql://localhost:3306/test?characterEncoding=utf8&allowMultiQueries=true
+    username: root
+    password: root
+  batch: 
+    initializer:
+      enabled: false
+    job:
+      enabled: false

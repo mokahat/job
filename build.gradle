@@ -1,0 +1,106 @@
+//gradle脚本自身需要使用的资源
+buildscript {
+    ext {
+        springBootVersion = '1.5.3.RELEASE'
+    }
+    repositories {
+       
+        mavenLocal()
+       
+        maven{ url"http://maven.aliyun.com/nexus/content/groups/public"}
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+apply plugin: 'java'
+	apply plugin: 'eclipse'
+    apply plugin: 'idea'
+    apply plugin: 'org.springframework.boot'
+    version = '0.0.2-SNAPSHOT'
+
+    // JVM 版本号要求
+    sourceCompatibility = 1.8   //缂栬瘧java鏂囦欢鐨刯dk鐗堟湰
+    targetCompatibility = 1.8
+
+    // java编译的时候缺省状态下会因为中文字符而失败
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+    //定义版本号
+    ext {
+        springVersion = '4.3.3.RELEASE'
+        springBootVersion = '1.5.3.RELEASE'
+        springCloudVersion = 'Dalston.SR4'
+    }
+
+    repositories {
+        //mavenCentral()
+        mavenLocal()
+        maven{ url"http://maven.aliyun.com/nexus/content/groups/public"}
+    }
+
+    dependencies {
+        //testCompile group: 'junit', name: 'junit', version: '4.11'
+
+        // 通用依赖
+        compile(
+                "org.springframework:spring-context:$springVersion",
+                "org.springframework:spring-orm:$springVersion",
+                "org.springframework:spring-tx:$springVersion",
+                "com.fasterxml.jackson.core:jackson-databind:2.8.2",
+        )
+        compile('org.springframework.boot:spring-boot-starter-web')
+		compile("org.springframework.boot:spring-boot-starter-batch")
+		compile("org.springframework.boot:spring-boot-starter-mail")
+		compile('mysql:mysql-connector-java')
+		compile('org.mybatis:mybatis:3.3.0')
+		compile('org.mybatis:mybatis-spring:1.2.3')
+		compile('tk.mybatis:mapper:3.3.4')
+		compile('com.github.pagehelper:pagehelper:4.1.1')
+		compile('org.mybatis:mybatis-typehandlers-jsr310:1.0.1')
+		compile("com.alibaba:druid:1.0.29")
+		compile("org.quartz-scheduler:quartz:2.3.0")
+		
+		testCompile('org.springframework.boot:spring-boot-starter-test')
+    }
+
+    
+    jar {
+        manifest {
+            attributes  'Main-Class': 'com.bqjr.mall.ApplicationJob'//使用公共的启动方法启动
+        }
+    
+    }
+   
+
+    configurations {
+        // 所有需要忽略的包定义在此
+        all*.exclude group: 'commons-httpclient'
+        all*.exclude group: 'commons-logging,'
+        all*.exclude group: 'org.slf4j', module: 'log4j-over-slf4j'
+        all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+        all*.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-data-elasticsearch'
+        //all*.exclude group: 'commons-beanutils', module: 'commons-beanutils'
+    }
+
+    //显示当前项目下所有用于compile的jar.
+    task listJars(description: 'Display all compile jars.') << {
+        configurations.compile.each { File file -> println file.name }
+    }
+
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
+    }
+   
+	task excludedev() << {
+		sourceSets { 
+			main { 
+				resources { 
+				exclude '**/application-dev.yml' //打包时排除所有开发环境的配置数据
+				exclude '**/application-dev.properties'
+				} 
+			}
+		}
+	}
